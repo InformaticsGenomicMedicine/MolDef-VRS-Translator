@@ -1,0 +1,67 @@
+[project]
+name = "MolDefTranslator" 
+version = "0.1.0" 
+description = "This project provides bidirectional translation between VRS and FHIR Allele Profiles."
+readme = "README.md"
+authors = [
+    {name = "Robert R. Freimuth"},
+    {name = "Salem Bajjali"}
+]
+
+license = {file = "LICENSE"}
+# Keywords for your project. These are tags that help users find the project.
+keywords = [
+    "FHIR",
+    "MolecularDefinition",
+    "FHIR-python"
+]  
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11"
+]
+requires-python = ">=3.11"
+
+dependencies = [
+    "ga4gh.vrs[extras]==2.1.3",
+    "ipykernel==6.28.0",
+    ]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==7.4.4",
+]
+
+[build-system]
+requires = ["setuptools>=65.3", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+src = ["src"]
+exclude = ["notebooks", "data", "edits"]
+
+[tool.ruff.lint]
+
+select = [
+    "F",  # https://docs.astral.sh/ruff/rules/#pyflakes-f
+    "E", "W",  # https://docs.astral.sh/ruff/rules/#pycodestyle-e-w
+    "I",  # https://docs.astral.sh/ruff/rules/#isort-i
+    "B",  # https://docs.astral.sh/ruff/rules/#flake8-bugbear-b
+    "UP",  # https://docs.astral.sh/ruff/rules/#pyupgrade-up
+    "SIM",  # https://docs.astral.sh/ruff/rules/#flake8-simplify-sim
+    "ARG",  # https://docs.astral.sh/ruff/rules/#flake8-unused-arguments-arg
+    "S",  # https://docs.astral.sh/ruff/rules/#flake8-bandit-s
+   ]
+
+ignore = ["E501"] # Ruff format already handles long lines
+fixable = ["ALL"]
+
+[tool.ruff.format]
+quote-style = "double"  # Enforce double quotes
+docstring-code-format = true  # Format code inside docstrings
