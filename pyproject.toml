@@ -1,5 +1,5 @@
 [project]
-name = "MolDefTranslator" 
+name = "fhir.moldef.translator" 
 version = "0.1.0" 
 description = "This project provides bidirectional translation between VRS and FHIR Allele Profiles."
 readme = "README.md"
