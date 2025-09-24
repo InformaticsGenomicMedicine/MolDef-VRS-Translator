@@ -11,7 +11,7 @@ To get the most out of these notebooks, we recommend the following prerequisites
 
 ## Notebook Categories
 
-### **Translation Notebooks** (`notebooks/translations/`)
+### **Translation Notebooks**
 
 - **[VRS to FHIR: Translation to AlleleProfile](vrs_allele_translation.ipynb)**  
    - Demonstrates how to convert **GA4GH VRS (v2.0)** representations into HL7 FHIR **AlleleProfile** resources.  
