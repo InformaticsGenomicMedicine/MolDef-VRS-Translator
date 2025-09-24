@@ -1,6 +1,6 @@
 ## MolDef-VRS-Translator Educational Notebook Series
 
-This repository contains a collection of interactive Jupyter notebooks designed to provide a hands-on introduction to the **MolDef-VRS-Translator** codebase. The notebooks cover working implementing bidirectional **translation between GA4GH VRS (v2.0)** and **HL7 FHIR MolecularDefinition**.
+This repository provides a collection of interactive Jupyter notebooks that offer a hands-on introduction to the **MolDef-VRS-Translator** codebase. The notebooks demonstrate how to perform bidirectional **translations between GA4GH VRS (v2.0)** and **HL7 FHIR MolecularDefinition**.
 
 ### **Recommended Knowledge**
 
