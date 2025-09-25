@@ -21,16 +21,11 @@ class AlleleNormalizer:
             models.Allele: The normalized VRS allele with GA4GH identifiers.
 
         """
-        # Translating the sequence id to ga4gh format
-        seq_id = self.dp.translate_sequence_identifier(
-            allele.location.sequence_id._value, "ga4gh"
-        )[0]
-        allele.location.sequence_id = seq_id
+
         # Using the ga4gh normalize function to normalize the allele. (Coming form biocommons.normalize())
         allele = vrs_normalize(allele, self.dp)
         # Setting the allele id to a  GA4GH digest-based id for the object, as a CURIE
-        allele._id = ga4gh_identify(allele)
+        allele.id = ga4gh_identify(allele)
         # Setting the location id to a GA4GH digest-based id for the object, as a CURIE
-        allele.location._id = ga4gh_identify(allele.location)
+        allele.location.id = ga4gh_identify(allele.location)
         return allele
-
