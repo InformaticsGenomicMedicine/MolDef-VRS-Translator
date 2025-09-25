@@ -1,6 +1,6 @@
 # from ga4gh.vrs.dataproxy import SeqRepoRESTDataProxy
 from ga4gh.vrs.dataproxy import create_dataproxy
-from ga4gh.vrs.extras.translator import Translator
+from ga4gh.vrs.extras.translator import AlleleTranslator
 
 from exceptions.api import SeqRepoDataProxyCreationError
 
@@ -15,7 +15,6 @@ class SeqRepoAPI:
     Raises:
         SeqRepoDataProxyCreationError: Raised when both the primary and fallback SeqRepo URLs fail to initialize a valid data proxy.
     """
-
     DEFAULT_LOCAL_URL = "seqrepo+file:///usr/local/share/seqrepo/2024-12-20/"
     HOST_URL = "seqrepo+https://services.genomicmedlab.org/seqrepo"
 
@@ -49,9 +48,8 @@ class SeqRepoAPI:
                     f"Failed to create seqrepo data proxy: {e}"
                 ) from e
 
-        self.tlr = Translator(
+        self.tlr = AlleleTranslator(
             data_proxy=self.seqrepo_dataproxy,
-            translate_sequence_identifiers=True,
-            normalize=True,
-            identify=True,
+            default_assembly_name="GRCh38", #Default value to this
+            identify = True
         )
