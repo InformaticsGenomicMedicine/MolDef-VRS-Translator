@@ -1,5 +1,3 @@
-#NOTE: This is draft one of the translations that is coming from fhir-moldef-python
-
 from fhir.resources.codeableconcept import CodeableConcept
 from fhir.resources.coding import Coding
 from fhir.resources.extension import Extension
@@ -18,7 +16,12 @@ from resources.moleculardefinition import (
     MolecularDefinitionRepresentation,
     MolecularDefinitionRepresentationLiteral,
 )
-from translators.allele_utils import detect_sequence_type, is_valid_vrs_allele
+from translators.allele_utils import (
+    detect_sequence_type,
+    is_valid_vrs_allele,
+    translate_sequence_id,
+)
+from translators.sequence_expression_translator import SequenceExpressionTranslator
 from translators.vrs_json_pointers import allele_identifiers as ALLELE_PTRS
 from translators.vrs_json_pointers import extension_identifiers as EXT_PTRS
 from translators.vrs_json_pointers import (
@@ -33,12 +36,13 @@ class VrsToFhirAlleleTranslator:
     def __init__(self):
         self.seqrepo_api = SeqRepoAPI()
         self.dp = self.seqrepo_api.seqrepo_dataproxy
+        self.rsl_to = SequenceExpressionTranslator()
 
     def translate_allele_to_fhir(self,vrs_allele):
         is_valid_vrs_allele(vrs_allele)
 
         if vrs_allele.state.type == "ReferenceLengthExpression":
-            vrs_allele = self.seq_expr_translator.translate_rle_to_lse(vrs_allele)
+            vrs_allele = self.rsl_to.translate_rle_to_lse(vrs_allele)
 
         return FhirAllele(
             identifier= self.map_identifiers(vrs_allele),
@@ -240,7 +244,7 @@ class VrsToFhirAlleleTranslator:
 
         raise TypeError("Unsupported extension value type. Must be str, bool, or float.")
 
-# ========== Sub-Extensions Mapping ==========  
+# ========== Sub-Extensions Mapping ==========
 
     def _map_location_extensions(self, source):
         """Generates a list of FHIR `Extension` instances based on attributes from a VRS.Location object (`name`, `description`, `aliases`, `digest`, `extensions`).
@@ -576,12 +580,12 @@ class VrsToFhirAlleleTranslator:
         seqref_residueAlphabet = getattr(source, "residueAlphabet", None)
         seqref_sequence = self._extract_str(getattr(source, "sequence", None))
         seqref_moleculeType = getattr(source, "moleculeType", None)
-        #NOTE: Circular is currently not represnted when we are going from vrs to fhir. 
+        #NOTE: Circular is currently not represnted when we are going from vrs to fhir.
 
-        # NOTE: While only `refgetAccession` is required, if `sequence` is provided and we want to include `residueAlphabet`, 
-        # we must include both — since `residueAlphabet` is tied to the literal representation, which requires a sequence value. 
+        # NOTE: While only `refgetAccession` is required, if `sequence` is provided and we want to include `residueAlphabet`,
+        # we must include both — since `residueAlphabet` is tied to the literal representation, which requires a sequence value.
         # If `residueAlphabet` is missing but `sequence` is present, we can infer it from `refgetAccession`.
-        
+
         rep_sequence = None
         if seqref_sequence:
             if seqref_residueAlphabet is None:

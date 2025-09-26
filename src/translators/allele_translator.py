@@ -23,7 +23,7 @@ from translators.allele_utils import (
     validate_accession,
     validate_indexing,
 )
-from normalize.allele_normalizer import AlleleNormalizer
+from normalizers.allele_normalizer import AlleleNormalizer
 from profiles.allele import Allele as FhirAllele
 from profiles.sequence import Sequence as FhirSequence
 

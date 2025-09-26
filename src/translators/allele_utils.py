@@ -20,6 +20,8 @@ def is_valid_vrs_allele(expression):
         InvalidVRSAlleleError: If the expression is not a valid VRS Allele object.
 
     """
+    valid_state_types = ["LiteralSequenceExpression", "ReferenceLengthExpression"]
+
     conditions = [
         (expression.type == "Allele", "The expression type must be 'Allele'."),
         (
@@ -27,8 +29,8 @@ def is_valid_vrs_allele(expression):
             "The location type must be 'SequenceLocation'.",
         ),
         (
-            expression.state.type == "LiteralSequenceExpression",
-            "The state type must be 'LiteralSequenceExpression'.",
+            expression.state.type in valid_state_types,
+            "The state type must be 'LiteralSequenceExpression' or 'ReferenceLengthExpression'.",
         ),
     ]
     for condition, error_message in conditions:
@@ -129,3 +131,28 @@ def validate_indexing(coord_system, start):
         )
 
     return start + adjustments[coord_system]
+
+def translate_sequence_id(dp, expression):
+    """Translate a sequence ID using SeqRepo and return the RefSeq ID.
+
+    Args:
+        dp (SeqRepo DataProxy): The data proxy used to translate the sequence.
+        expression: An object containing sequence location info.
+
+    Raises:
+        ValueError: If translation fails or if format is unexpected.
+
+    Returns:
+        str: A valid RefSeq identifier (e.g., NM_000123.3).
+    """
+    sequence = f"ga4gh:{expression.location.get_refget_accession()}"
+    translated_ids = dp.translate_sequence_identifier(sequence, namespace="refseq")
+    if not translated_ids:
+        raise ValueError(f"No RefSeq ID found for sequence ID '{sequence}'.")
+
+    translated_id = translated_ids[0]
+    if not translated_id.startswith("refseq:"):
+        raise ValueError(f"Unexpected ID format in '{translated_id}'")
+
+    _, refseq_id = translated_id.split(":")
+    return refseq_id
