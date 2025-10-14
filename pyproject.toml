@@ -4,8 +4,8 @@ version = "0.1.0"
 description = "This project provides bidirectional translation between VRS and FHIR Allele Profiles."
 readme = "README.md"
 authors = [
+    {name = "Salem Bajjali"},
     {name = "Robert R. Freimuth"},
-    {name = "Salem Bajjali"}
 ]
 
 license = {file = "LICENSE"}
