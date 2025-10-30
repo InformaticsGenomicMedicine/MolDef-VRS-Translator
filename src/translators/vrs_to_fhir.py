@@ -5,7 +5,7 @@ from fhir.resources.identifier import Identifier
 from fhir.resources.quantity import Quantity
 from fhir.resources.reference import Reference
 
-from api.seqrepo import SeqRepoAPI
+from api.seqrepo import SeqRepoClient
 from profiles.allele import Allele as FhirAllele
 from profiles.sequence import Sequence as FhirSequence
 from resources.moleculardefinition import (
@@ -34,8 +34,8 @@ from translators.vrs_json_pointers import sequence_reference_identifiers as SEQ_
 class VrsToFhirAlleleTranslator:
 
     def __init__(self):
-        self.seqrepo_api = SeqRepoAPI()
-        self.dp = self.seqrepo_api.seqrepo_dataproxy
+        self.seqrepo_api = SeqRepoClient()
+        self.dp = self.seqrepo_api.dataproxy
         self.rsl_to = SequenceExpressionTranslator()
 
     def translate_allele_to_fhir(self,vrs_allele):

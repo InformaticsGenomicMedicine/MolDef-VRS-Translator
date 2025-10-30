@@ -9,7 +9,6 @@ from ga4gh.vrs.models import (
     sequenceString,
 )
 
-from api.seqrepo import SeqRepoAPI
 from translators.vrs_json_pointers import allele_identifiers as ALLELE_PTRS
 from translators.vrs_json_pointers import extension_identifiers as EXT_PTRS
 from translators.vrs_json_pointers import literal_sequence_expression_identifiers as LSE

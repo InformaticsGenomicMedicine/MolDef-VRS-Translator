@@ -1,15 +1,15 @@
 from ga4gh.core import ga4gh_identify
 from ga4gh.vrs import normalize as vrs_normalize
 
-from api.seqrepo import SeqRepoAPI
+from api.seqrepo import SeqRepoClient
 
 
 class AlleleNormalizer:
     """Initialize the AlleleNormalizer with a SeqRepo-backed data proxy.
     """
     def __init__(self):
-        self.seqrepo_api = SeqRepoAPI()
-        self.dp = self.seqrepo_api.seqrepo_dataproxy
+        self.seqrepo_api = SeqRepoClient()
+        self.dp = self.seqrepo_api.dataproxy
 
     def post_normalize_allele(self, allele):
         """Normalize the VRS allele and assign GA4GH identifiers.

@@ -12,7 +12,7 @@ from ga4gh.vrs.models import (
     sequenceString,
 )
 
-from api.seqrepo import SeqRepoAPI
+from api.seqrepo import SeqRepoClient
 from normalizers.allele_normalizer import AlleleNormalizer
 from profiles.allele import Allele as FhirAllele
 from profiles.sequence import Sequence as FhirSequence
@@ -35,8 +35,8 @@ class AlleleFactory:
 
     def __init__(self):
         self.normalize = AlleleNormalizer()
-        self.seqrepo_api = SeqRepoAPI()
-        self.dp = self.seqrepo_api.seqrepo_dataproxy
+        self.seqrepo_api = SeqRepoClient()
+        self.dp = self.seqrepo_api.dataproxy
 
     def _refseq_to_fhir_id(self, refseq_accession):
         """Convert a RefSeq accession to a FHIR-compatible ID.

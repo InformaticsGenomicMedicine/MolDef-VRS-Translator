@@ -13,7 +13,7 @@ from ga4gh.vrs.models import (
     sequenceString,
 )
 
-from api.seqrepo import SeqRepoAPI
+from api.seqrepo import SeqRepoClient
 from normalizers.allele_normalizer import AlleleNormalizer
 from profiles.allele import Allele as FhirAllele
 from profiles.sequence import Sequence as FhirSequence
@@ -40,8 +40,8 @@ class VrsFhirAlleleTranslator:
     """Handles VRS <-> FHIR Allele conversion for 'contained' format."""
 
     def __init__(self):
-        self.seqrepo_api = SeqRepoAPI()
-        self.dp = self.seqrepo_api.seqrepo_dataproxy
+        self.seqrepo_api = SeqRepoClient()
+        self.dp = self.seqrepo_api.dataproxy
         self.norm = AlleleNormalizer()
         self.rsl_to = SequenceExpressionTranslator()
 

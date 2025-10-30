@@ -7,7 +7,7 @@ from fhir.resources.quantity import Quantity
 from fhir.resources.reference import Reference
 from ga4gh.vrs import models
 
-from api.seqrepo import SeqRepoAPI
+from api.seqrepo import SeqRepoClient
 from resources.moleculardefinition import (
     MolecularDefinitionLocation,
     MolecularDefinitionLocationSequenceLocation,
@@ -32,8 +32,8 @@ class VrsFhirAlleleTranslation:
     """Handles VRS <-> FHIR Allele conversion for 'contained' format."""
 
     def __init__(self):
-        self.seqrepo_api = SeqRepoAPI()
-        self.dp = self.seqrepo_api.seqrepo_dataproxy
+        self.seqrepo_api = SeqRepoClient()
+        self.dp = self.seqrepo_api.dataproxy
         self.norm = AlleleNormalizer()
 
     ##############################################################
