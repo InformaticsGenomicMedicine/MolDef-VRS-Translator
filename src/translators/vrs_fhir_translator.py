@@ -14,7 +14,7 @@ from ga4gh.vrs.models import (
 )
 
 from api.seqrepo import SeqRepoClient
-from normalizers.allele_normalizer import AlleleNormalizer
+from vrs_tools.normalizer import VariantNormalizer
 from profiles.allele import Allele as FhirAllele
 from profiles.sequence import Sequence as FhirSequence
 from resources.moleculardefinition import (
@@ -42,7 +42,7 @@ class VrsFhirAlleleTranslator:
     def __init__(self):
         self.seqrepo_api = SeqRepoClient()
         self.dp = self.seqrepo_api.dataproxy
-        self.norm = AlleleNormalizer()
+        self.norm = VariantNormalizer()
         self.rsl_to = SequenceExpressionTranslator()
 
     ##############################################################
@@ -281,7 +281,7 @@ class VrsFhirAlleleTranslator:
             state=lit_seq_expr
         )
 
-        return self.norm.post_normalize_allele(allele) if normalize else allele
+        return self.norm.normalize(allele) if normalize else allele
 
     def translate_allele_to_fhir(self, expression):
 
