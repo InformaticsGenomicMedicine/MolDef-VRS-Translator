@@ -1,4 +1,3 @@
-#NOTE: This is draft one of the translations that is coming from fhir-moldef-python
 from ga4gh.core.models import Extension
 from ga4gh.vrs.models import (
     Allele,
@@ -542,5 +541,3 @@ class FhirToVrsAlleleTranslator:
             if val is not None:
                 return val
         return None
-
-

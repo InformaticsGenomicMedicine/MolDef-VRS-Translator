@@ -42,7 +42,7 @@ class VrsFhirAlleleTranslator:
     def __init__(self):
         self.seqrepo_api = SeqRepoClient()
         self.dp = self.seqrepo_api.dataproxy
-        self.norm = VariantNormalizer()
+        self.service = VariantNormalizer(dataproxy=self.dp)
         self.rsl_to = SequenceExpressionTranslator()
 
     ##############################################################
@@ -281,7 +281,7 @@ class VrsFhirAlleleTranslator:
             state=lit_seq_expr
         )
 
-        return self.norm.normalize(allele) if normalize else allele
+        return self.service.normalize(allele) if normalize else allele
 
     def translate_allele_to_fhir(self, expression):
 
