@@ -1,6 +1,6 @@
 [project]
 name = "fhir.moldef.translator" 
-version = "0.1.0" 
+version = "0.2.0" 
 description = "This project provides bidirectional translation between VRS and FHIR Allele Profiles."
 readme = "README.md"
 authors = [
@@ -26,7 +26,7 @@ classifiers = [
 requires-python = ">=3.11"
 
 dependencies = [
-    "ga4gh.vrs[extras]==2.1.3",
+    "ga4gh.vrs[extras]==2.2.0",
     "ipykernel==6.28.0",
     ]
 
