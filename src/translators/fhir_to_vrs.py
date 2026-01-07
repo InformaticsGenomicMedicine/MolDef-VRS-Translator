@@ -8,16 +8,21 @@ from ga4gh.vrs.models import (
     sequenceString,
 )
 
-from translators.vrs_json_pointers import allele_identifiers as ALLELE_PTRS
-from translators.vrs_json_pointers import extension_identifiers as EXT_PTRS
-from translators.vrs_json_pointers import literal_sequence_expression_identifiers as LSE
-from translators.vrs_json_pointers import sequence_location_identifiers as SEQ_LOC
-from translators.vrs_json_pointers import sequence_reference_identifiers as SEQ_REF
+from translators.constants.vrs_json_pointers import allele_identifiers as ALLELE_PTRS
+from translators.constants.vrs_json_pointers import extension_identifiers as EXT_PTRS
+from translators.constants.vrs_json_pointers import (
+    literal_sequence_expression_identifiers as LSE,
+)
+from translators.constants.vrs_json_pointers import (
+    sequence_location_identifiers as SEQ_LOC,
+)
+from translators.constants.vrs_json_pointers import (
+    sequence_reference_identifiers as SEQ_REF,
+)
 
 
 class FhirToVrsAlleleTranslator:
-
-    def translate_allele_to_vrs(self,ao):
+    def translate_allele_to_vrs(self, ao):
         """Converts a FHIR Allele Profile object into a fully populated VRS 2.0 Allele object.
 
         Args:
@@ -28,20 +33,20 @@ class FhirToVrsAlleleTranslator:
         """
         meta = self._extract_allele_metadata(ao)
         return Allele(
-            id=meta['id'],
-            name=meta['name'],
+            id=meta["id"],
+            name=meta["name"],
             type="Allele",
-            aliases=meta['aliases'],
-            digest=meta['digest'],
+            aliases=meta["aliases"],
+            digest=meta["digest"],
             description=ao.description,
-            expressions= self._map_expressions(ao),
+            expressions=self._map_expressions(ao),
             location=self._map_sequence_location(ao),
-            state = self._map_literal_sequence_expression(ao)
+            state=self._map_literal_sequence_expression(ao),
         )
 
-# ========== Meta Data Mapping ==========
+    # ========== Meta Data Mapping ==========
 
-    def _extract_allele_metadata(self,ao):
+    def _extract_allele_metadata(self, ao):
         """Parses the `identifier` fields of a FHIR Allele Profile to extract metadata.
 
         Args:
@@ -54,24 +59,25 @@ class FhirToVrsAlleleTranslator:
             - 'digest' (str): A computed digest or hash of the allele.
             - 'aliases' (list of str): A list of alternate identifiers for the allele.
         """
-        values = {'aliases': []}
+        values = {"aliases": []}
 
         for identifier in ao.identifier:
             for key, system_uri in ALLELE_PTRS.items():
                 if system_uri in identifier.system:
-                    if key == 'aliases':
-                        values.setdefault('aliases', []).append(identifier.value)
+                    if key == "aliases":
+                        values.setdefault("aliases", []).append(identifier.value)
                     else:
                         values[key] = identifier.value or None
 
-        for key in ['id', 'name', 'digest']:
+        for key in ["id", "name", "digest"]:
             values.setdefault(key, None)
 
-        if not values['aliases']:
-            values['aliases'] = None
+        if not values["aliases"]:
+            values["aliases"] = None
 
         return values
-# ========== Expressions Mapping ==========
+
+    # ========== Expressions Mapping ==========
 
     def _map_expressions(self, ao):
         """Maps the expression information from a FHIR Allele Profile to a VRS Expression.
@@ -83,28 +89,32 @@ class FhirToVrsAlleleTranslator:
             list[Expression]: A list containing a single VRS `Expression` object with
             extracted syntax, value, version, and optional extensions.
         """
-        
+
         if not ao.representation[0].code:
             return None
-        
+
         expression_list = []
         for code in ao.representation[0].code:
-            extensions = self._extract_nested_extensions(code.extension) if code.extension else None
+            extensions = (
+                self._extract_nested_extensions(code.extension)
+                if code.extension
+                else None
+            )
             for coding in code.coding:
                 exp = Expression(
-                    id = code.id,
+                    id=code.id,
                     syntax=coding.display,
                     value=coding.code,
                     syntax_version=coding.version,
-                    extensions = extensions
-                    )
+                    extensions=extensions,
+                )
                 expression_list.append(exp)
 
         return expression_list
-    
-# ========== Sequence Location Mapping ==========
 
-    def _map_sequence_location(self,ao):
+    # ========== Sequence Location Mapping ==========
+
+    def _map_sequence_location(self, ao):
         """Maps sequence location data from a FHIR Allele Profile to a VRS SequenceLocation object.
 
         Args:
@@ -118,21 +128,21 @@ class FhirToVrsAlleleTranslator:
         location_data = self._extract_location_fields(ao.location)
         sequence, _ = self._extract_contained_sequences(ao)
         literal_sequence = self._extract_contained_sequence_value(sequence)
-        mapped_extensions = self._map_extension(location_data['extensions'])
+        mapped_extensions = self._map_extension(location_data["extensions"])
 
         return SequenceLocation(
-            id=location_data['id'],
-            name=location_data['name'],
-            description=location_data['description'],
+            id=location_data["id"],
+            name=location_data["name"],
+            description=location_data["description"],
             extensions=mapped_extensions,
-            digest=location_data['digest'],
-            aliases=location_data['aliases'],
-            type = "SequenceLocation",
+            digest=location_data["digest"],
+            aliases=location_data["aliases"],
+            type="SequenceLocation",
             sequenceReference=self._map_sequence_reference(ao),
             start=start,
             end=end,
-            sequence=literal_sequence # coming from contained value
-            )
+            sequence=literal_sequence,  # coming from contained value
+        )
 
     def _get_coordinates(self, ao):
         """Extracts start and end coordinate values from a FHIR Allele Profile.
@@ -146,7 +156,7 @@ class FhirToVrsAlleleTranslator:
         interval = ao.location[0].sequenceLocation.coordinateInterval
         return interval.startQuantity.value, interval.endQuantity.value
 
-    def _map_sequence_reference(self,ao):
+    def _map_sequence_reference(self, ao):
         """Maps sequence reference data from a FHIR Allele Profile to a VRS SequenceReference object.
 
         Args:
@@ -158,25 +168,28 @@ class FhirToVrsAlleleTranslator:
         _, sequenceReference = self._extract_contained_sequences(ao)
         ref_seq_data = self._extract_reference_sequence_fields(sequenceReference)
 
-        mapped_extensions = self._map_extension(ref_seq_data['extensions'])
+        mapped_extensions = self._map_extension(ref_seq_data["extensions"])
 
-        refget_accession,molecule_type,residue_alphabet,literal_sequence = self._extract_contained_sequence_reference_details(sequenceReference)
-
-        return SequenceReference(
-            id =ref_seq_data['id'] ,
-            name = ref_seq_data['name'],
-            description =ref_seq_data['description'],
-            aliases = ref_seq_data['aliases'],
-            extensions=mapped_extensions,
-            refgetAccession = refget_accession,
-            residueAlphabet = residue_alphabet,
-            moleculeType=self._validate_molecule_type(molecule_type),
-            circular=False, #NOTE: this is hard coded
-            sequence=literal_sequence
+        refget_accession, molecule_type, residue_alphabet, literal_sequence = (
+            self._extract_contained_sequence_reference_details(sequenceReference)
         )
 
-# ========== Contained Resource Parsing ==========
-    def _extract_contained_sequences(self,ao):
+        return SequenceReference(
+            id=ref_seq_data["id"],
+            name=ref_seq_data["name"],
+            description=ref_seq_data["description"],
+            aliases=ref_seq_data["aliases"],
+            extensions=mapped_extensions,
+            refgetAccession=refget_accession,
+            residueAlphabet=residue_alphabet,
+            moleculeType=self._validate_molecule_type(molecule_type),
+            # TODO/NOTE: No place to put this in the fhir schema/ so we can just hard code it.
+            # circular=False,
+            sequence=literal_sequence,
+        )
+
+    # ========== Contained Resource Parsing ==========
+    def _extract_contained_sequences(self, ao):
         """Extracts sequence and sequenceReference resources from a FHIR Allele Profile's contained list.
 
         Args:
@@ -200,15 +213,17 @@ class FhirToVrsAlleleTranslator:
                 seq_ref = resource
 
         if seq is None and seq_ref is None:
-            raise ValueError("Both 'vrs-location-sequence' and 'vrs-location-sequenceReference' are missing.")
+            raise ValueError(
+                "Both 'vrs-location-sequence' and 'vrs-location-sequenceReference' are missing."
+            )
 
         return seq, seq_ref
 
-    def _extract_contained_sequence_value(self,sequence):
+    def _extract_contained_sequence_value(self, sequence):
         """Extracts the literal sequence string from a contained FHIR sequence resource.
 
         Args:
-            sequence (object): A FHIR `contained` sequence resource with a 
+            sequence (object): A FHIR `contained` sequence resource with a
             `representation.literal.value` field.
 
         Returns:
@@ -218,7 +233,7 @@ class FhirToVrsAlleleTranslator:
             return None
         return sequenceString(sequence.representation[0].literal.value)
 
-    def _extract_contained_sequence_reference_details(self,seq_ref):
+    def _extract_contained_sequence_reference_details(self, seq_ref):
         """Extracts sequence reference metadata from a contained sequenceReference resource.
 
         Args:
@@ -227,7 +242,7 @@ class FhirToVrsAlleleTranslator:
         Returns:
         tuple[str, str, str, str]: A tuple containing:
             - refgetAccession (str): A RefGet digest identifier for the sequence.
-            - moleculeType (str): The type of molecule ("genomic", "RNA", "mRNA", or "protein"). 
+            - moleculeType (str): The type of molecule ("genomic", "RNA", "mRNA", or "protein").
             - residueAlphabet (str): The encoding alphabet for the sequence ("na" or "aa").
             - sequence (str): A literal representation of the sequence.
         """
@@ -239,7 +254,9 @@ class FhirToVrsAlleleTranslator:
         residue_alphabet = None
         sequence = None
 
-        if hasattr(representation, "literal") and hasattr(representation.literal, "encoding"):
+        if hasattr(representation, "literal") and hasattr(
+            representation.literal, "encoding"
+        ):
             residue_alphabet = representation.literal.encoding.coding[0].code
             sequence = sequenceString(representation.literal.value)
 
@@ -258,18 +275,14 @@ class FhirToVrsAlleleTranslator:
             str or None: Returns 'na' for nucleic acids (DNA or RNA), 'aa' for proteins,
         or None if the molecule type is unrecognized.
         """
-        residue_alphabet = {
-            'DNA': 'na',
-            'RNA': 'na',
-            'protein': 'aa'
-        }
+        residue_alphabet = {"dna": "na", "rna": "na", "amino acid": "aa"}
         return residue_alphabet.get(molecule_type)
 
     def _validate_molecule_type(self, molecule_type):
         """Validates and converts a FHIR molecule type to its VRS-compliant equivalent.
 
         Args:
-            molecule_type (str): A molecule type from a FHIR resource. Expected values are 'dna', 'rna', or 'protein' 
+            molecule_type (str): A molecule type from a FHIR resource. Expected values are 'dna', 'rna', or 'protein'
               (case-insensitive).
 
         Raises:
@@ -278,45 +291,43 @@ class FhirToVrsAlleleTranslator:
         Returns:
             str: A molecule type string compatible with VRS. One of 'genomic', 'RNA', or 'protein'.
         """
-        mapped_molType = {
-            'dna': 'genomic',
-            'rna': 'RNA',
-            'protein': 'protein'
-        }
+        mapped_molType = {"dna": "genomic", "rna": "RNA", "amino acid": "protein"}
 
         molecule_type = molecule_type.lower()
 
         if molecule_type in mapped_molType:
             return mapped_molType[molecule_type]
 
-        raise ValueError(f"Unsupported moleculeType: '{molecule_type}'. Expected one of: dna, rna, protein.")
+        raise ValueError(
+            f"Unsupported moleculeType: '{molecule_type}'. Expected one of: dna, rna, amino acid."
+        )
 
-# ========== Literal Sequence Expression Mapping ==========
+    # ========== Literal Sequence Expression Mapping ==========
 
-    def _map_literal_sequence_expression(self,ao):
+    def _map_literal_sequence_expression(self, ao):
         """Maps a FHIR literal sequence expression to a VRS LiteralSequenceExpression object.
 
         Args:
-            ao (AlleleObject): A FHIR Allele Profile object that includes one or more 
+            ao (AlleleObject): A FHIR Allele Profile object that includes one or more
             literal sequence representations.
 
         Returns:
-            LiteralSequenceExpression: A VRS-compliant object that encapsulates a literal 
+            LiteralSequenceExpression: A VRS-compliant object that encapsulates a literal
         sequence and its associated metadata and extensions.
         """
         lse_data = self._extract_literal_fields(ao.representation)
-        mapped_extensions = self._map_extension(lse_data['extensions'])
+        mapped_extensions = self._map_extension(lse_data["extensions"])
 
         return LiteralSequenceExpression(
-            id=lse_data['id'],
-            name=lse_data['name'],
-            description=lse_data['description'],
-            aliases = lse_data['aliases'],
+            id=lse_data["id"],
+            name=lse_data["name"],
+            description=lse_data["description"],
+            aliases=lse_data["aliases"],
             extensions=mapped_extensions,
-            sequence=sequenceString(self._get_literal_sequence_value(ao))
+            sequence=sequenceString(self._get_literal_sequence_value(ao)),
         )
 
-    def _get_literal_sequence_value(self,ao):
+    def _get_literal_sequence_value(self, ao):
         """Retrieves the literal sequence string from a FHIR Allele Profile.
 
         Args:
@@ -327,8 +338,8 @@ class FhirToVrsAlleleTranslator:
         """
         return ao.representation[0].literal.value
 
-# ========== Extension Mapping ==========
-    def _map_extension(self,ext_list):
+    # ========== Extension Mapping ==========
+    def _map_extension(self, ext_list):
         """Recursively maps a list of extension dictionaries into Extension objects.
 
         Args:
@@ -340,28 +351,28 @@ class FhirToVrsAlleleTranslator:
         """
         extension_objects = []
         for ext in ext_list:
-            exts = ext.get('extensions')
+            exts = ext.get("extensions")
             sub_extensions = self._map_extension(exts) if exts else None
             extension_objects.append(
                 Extension(
-                    id=ext.get('id'),
-                    name=ext.get('name'),
-                    value=ext.get('value'),
-                    description=ext.get('description'),
-                    extensions=sub_extensions
+                    id=ext.get("id"),
+                    name=ext.get("name"),
+                    value=ext.get("value"),
+                    description=ext.get("description"),
+                    extensions=sub_extensions,
                 )
             )
         return extension_objects or None
 
-    def _extract_location_fields(self,location_obj):
+    def _extract_location_fields(self, location_obj):
         """Extracts structured metadata from a list of FHIR location objects.
 
         Args:
-            llocation_obj (list): A list of FHIR location objects, each potentially 
+            llocation_obj (list): A list of FHIR location objects, each potentially
             containing extensions that define metadata fields.
 
         Returns:
-            list[dict]: A list of dictionaries, one per location object, each containing: id,name, description, digest, aliases ,extensions 
+            list[dict]: A list of dictionaries, one per location object, each containing: id,name, description, digest, aliases ,extensions
         """
 
         for loc in location_obj:
@@ -371,7 +382,7 @@ class FhirToVrsAlleleTranslator:
                 "description": None,
                 "digest": None,
                 "aliases": [],
-                "extensions": []
+                "extensions": [],
             }
 
             for ext in getattr(loc, "extension", []):
@@ -386,7 +397,7 @@ class FhirToVrsAlleleTranslator:
                     result["digest"] = val
                 elif SEQ_LOC["aliases"] in url:
                     result["aliases"].append(val)
-                elif getattr(ext, "id", None):
+                elif ext.extension:
                     nested = self._extract_nested_extensions([ext])
                     if nested:
                         result["extensions"].extend(nested)
@@ -396,17 +407,17 @@ class FhirToVrsAlleleTranslator:
 
         return result
 
-    def _extract_literal_fields(self,representation_obj):
+    def _extract_literal_fields(self, representation_obj):
         """Extracts metadata fields from FHIR literal sequence representations.
 
         Args:
-            representation_obj (list): A list of FHIR representation objects, each 
-            potentially containing a `literal` element with structured metadata 
+            representation_obj (list): A list of FHIR representation objects, each
+            potentially containing a `literal` element with structured metadata
             in extensions.
 
         Returns:
-           dict: A dictionary representing the last literal sequence expression found. 
-        Includes the fields: id, name, description, aliases, and extensions. 
+           dict: A dictionary representing the last literal sequence expression found.
+        Includes the fields: id, name, description, aliases, and extensions.
         """
 
         for rep in representation_obj:
@@ -419,11 +430,10 @@ class FhirToVrsAlleleTranslator:
                 "name": None,
                 "description": None,
                 "aliases": [],
-                "extensions": []
+                "extensions": [],
             }
 
-
-            for ext in getattr(literal, "extension", []):
+            for ext in getattr(literal, "extension", None) or []:
                 url = getattr(ext, "url", "") or ""
                 val = self._get_extension_value(ext)
 
@@ -433,7 +443,7 @@ class FhirToVrsAlleleTranslator:
                     result["description"] = val
                 elif LSE["aliases"] in url:
                     result["aliases"].append(val)
-                elif getattr(ext, "id", None):
+                elif ext.extension:
                     nested = self._extract_nested_extensions([ext])
                     if nested:
                         result["extensions"].extend(nested)
@@ -443,14 +453,14 @@ class FhirToVrsAlleleTranslator:
 
         return result
 
-    def _extract_reference_sequence_fields(self,ref_seq):
+    def _extract_reference_sequence_fields(self, ref_seq):
         """Extract metadata fields from a FHIR `sequenceReference` resource.
 
         Args:
             ref_seq (object): A FHIR resource object representing a contained `sequenceReference`.
 
         Returns:
-           dict: A dictionary containing the extracted fields: id, name, description, 
+           dict: A dictionary containing the extracted fields: id, name, description,
             digest, aliases, and extensions.
         """
         result = {
@@ -459,22 +469,22 @@ class FhirToVrsAlleleTranslator:
             "description": None,
             "digest": None,
             "aliases": [],
-            "extensions": []
+            "extensions": [],
         }
 
-        for ext in getattr(ref_seq, "extension", []):
+        for ext in getattr(ref_seq, "extension", None) or []:
             url = getattr(ext, "url", "") or ""
             val = self._get_extension_value(ext)
 
-            if SEQ_REF['id'] in url:
-                result['id'] = val
+            if SEQ_REF["id"] in url:
+                result["id"] = val
             if SEQ_REF["name"] in url:
                 result["name"] = val
             elif SEQ_REF["description"] in url:
                 result["description"] = val
             elif SEQ_REF["aliases"] in url:
                 result["aliases"].append(val)
-            elif getattr(ext, "id", None):
+            elif hasattr(ext, "extension"):
                 nested = self._extract_nested_extensions([ext])
                 if nested:
                     result["extensions"].extend(nested)
@@ -484,7 +494,7 @@ class FhirToVrsAlleleTranslator:
 
         return result
 
-    def _extract_nested_extensions(self,extension_list):
+    def _extract_nested_extensions(self, extension_list):
         """Recursively extracts structured metadata from nested FHIR extensions.
 
         Args:
@@ -499,6 +509,12 @@ class FhirToVrsAlleleTranslator:
             ext_id = getattr(ext, "id", None)
             result = {"id": ext_id}
             inner_extensions = getattr(ext, "extension", [])
+
+            if (
+                inner_extensions is None
+            ):  # to avoid extensions that are none. Prefer to find a better solution.
+                continue
+
             nested_ext = []
 
             for inner_ext in inner_extensions:
@@ -511,7 +527,7 @@ class FhirToVrsAlleleTranslator:
                     result["value"] = inner_val
                 elif EXT_PTRS["description"] in inner_url:
                     result["description"] = inner_val
-                elif hasattr(inner_ext, "extension") or "extension" in inner_ext:
+                elif hasattr(inner_ext, "extension"):
                     nested_ext.extend(self._extract_nested_extensions([inner_ext]))
 
             if nested_ext:

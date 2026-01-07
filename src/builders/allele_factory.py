@@ -1,9 +1,8 @@
-# Import required libraries
 from fhir.resources.codeableconcept import CodeableConcept
 from fhir.resources.coding import Coding
-
 from fhir.resources.quantity import Quantity
 from fhir.resources.reference import Reference
+from ga4gh.vrs.dataproxy import create_dataproxy
 from ga4gh.vrs.models import (
     Allele,
     LiteralSequenceExpression,
@@ -12,8 +11,6 @@ from ga4gh.vrs.models import (
     sequenceString,
 )
 
-from api.seqrepo import SeqRepoClient
-from vrs_tools.normalizer import VariantNormalizer
 from profiles.allele import Allele as FhirAllele
 from profiles.sequence import Sequence as FhirSequence
 from resources.moleculardefinition import (
@@ -24,32 +21,26 @@ from resources.moleculardefinition import (
     MolecularDefinitionRepresentation,
     MolecularDefinitionRepresentationLiteral,
 )
-from translators.allele_utils import detect_sequence_type, validate_accession
+from conventions.coordinate_systems import vrs_coordinate_interval
+from conventions.refseq_identifiers import (
+    detect_sequence_type,
+    validate_accession,
+    refseq_to_fhir_id,
+)
+from vrs_tools.normalizer import VariantNormalizer
 
 
-class AlleleFactory:
+class AlleleBuilder:
     """The goal of this module is to simplify the creation of FHIR Allele, eliminating the need to build them step by step or through the unpackaging process.
     These FHIR Allele will come with pre-filled attributes, allowing you to input just five key attributes: id, startQuantity, endQuantity, reference sequence, and literal value.
     This function specifically creates an FHIR Allele for Literal Value representation.
     """
 
-    def __init__(self):
-        self.norm = VariantNormalizer()
-        self.seqrepo_api = SeqRepoClient()
-        self.dp = self.seqrepo_api.dataproxy
+    def __init__(self, dp=None, uri: str | None = None):
+        self.dp = dp or create_dataproxy(uri=uri)
+        self.service = VariantNormalizer(dp=self.dp)
 
-    def _refseq_to_fhir_id(self, refseq_accession):
-        """Convert a RefSeq accession to a FHIR-compatible ID.
-
-        Args:
-            refseq_accession (str): A RefSeq accession string (e.g., 'NM_001200.3').
-
-        Returns:
-            str: A normalized FHIR-compatible ID (e.g., 'nm001200').
-        """
-        return refseq_accession.split(".", 1)[0].replace("_", "").lower()
-
-    def create_vrs_allele(
+    def build_vrs_allele(
         self,
         context_sequence_id: str,
         start: int,
@@ -71,29 +62,26 @@ class AlleleFactory:
             models.Allele: A VRS Allele object, either in normalized form or as originally constructed.
 
         """
-        refget_accession = self.dp.derive_refget_accession(f"refseq:{context_sequence_id}")
+        refget_accession = self.dp.derive_refget_accession(
+            f"refseq:{context_sequence_id}"
+        )
         seq_ref = SequenceReference(
             refgetAccession=refget_accession.split("refget:")[-1]
-            )
+        )
 
         seq_location = SequenceLocation(
             sequenceReference=seq_ref,
-            start = start,
+            start=start,
             end=end,
         )
-        lit_seq_expr = LiteralSequenceExpression(
-            sequence=sequenceString(allele_state)
-        )
-        allele = Allele(
-            location=seq_location,
-            state=lit_seq_expr
-        )
+        lit_seq_expr = LiteralSequenceExpression(sequence=sequenceString(allele_state))
+        allele = Allele(location=seq_location, state=lit_seq_expr)
         if normalize:
-            return self.norm.normalize(allele)
+            return self.service.normalize(allele)
         else:
             return allele
 
-    def create_fhir_allele(
+    def build_fhir_allele(
         self,
         context_sequence_id: str,
         start: int,
@@ -139,22 +127,15 @@ class AlleleFactory:
         if id_value is not None:
             fhir_id = id_value
         else:
-            fhir_id = self._refseq_to_fhir_id(refseq_accession=val_sequence_id)
+            fhir_id = refseq_to_fhir_id(refseq_accession=val_sequence_id)
 
         sequence_profile = FhirSequence(
             id=f"ref-to-{fhir_id}",
             moleculeType=mol_type,
             representation=[representation_sequence],
         )
-        coord_system = CodeableConcept(
-            coding=[
-                {
-                    "system": "http://loinc.org",
-                    "code": "LA30100-4",
-                    "display": "0-based interval counting",
-                }
-            ]
-        )
+
+        system, origin, normalizationMethod = vrs_coordinate_interval()
 
         seq_context = Reference(
             reference=f"#{sequence_profile.id}", type="MolecularDefinition"
@@ -164,6 +145,7 @@ class AlleleFactory:
                 Coding(
                     system="http://hl7.org/fhir/moleculardefinition-focus",
                     code="allele-state",
+                    display="Allele State",
                 )
             ]
         )
@@ -176,7 +158,7 @@ class AlleleFactory:
         )
 
         coord_system_fhir = MolecularDefinitionLocationSequenceLocationCoordinateIntervalCoordinateSystem(
-            system=coord_system
+            system=system, origin=origin, normalizationMethod=normalizationMethod
         )
         coord_interval = MolecularDefinitionLocationSequenceLocationCoordinateInterval(
             coordinateSystem=coord_system_fhir,

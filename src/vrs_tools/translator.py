@@ -1,5 +1,6 @@
 from ga4gh.vrs.extras.translator import AlleleTranslator
 
+
 class VariantTranslator:
     """Translates external variant representations (SPDI, HGVS, Beacon) into VRS objects."""
 
