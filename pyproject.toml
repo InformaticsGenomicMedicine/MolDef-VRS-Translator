@@ -1,6 +1,6 @@
 [project]
 name = "fhir.moldef.translator" 
-version = "0.2.0" 
+version = "0.3.0" 
 description = "This project provides bidirectional translation between VRS and FHIR Allele Profiles."
 readme = "README.md"
 authors = [
@@ -33,6 +33,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest==7.4.4",
+    "ruff==0.8.3",
 ]
 
 [build-system]
