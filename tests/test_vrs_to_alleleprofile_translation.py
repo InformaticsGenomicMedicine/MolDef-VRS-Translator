@@ -3,7 +3,7 @@ from decimal import Decimal
 import pytest
 from ga4gh.vrs.models import Allele
 
-from translators.vrs_fhir_translator import VrsFhirAlleleTranslation
+from translators.vrs_fhir_translator import VrsFhirAlleleTranslator
 
 
 @pytest.fixture
@@ -29,11 +29,13 @@ def example():
 
 @pytest.fixture
 def allele_translator():
-    return VrsFhirAlleleTranslation()
+    return VrsFhirAlleleTranslator()
+
 
 @pytest.fixture
 def vrs_allele(example):
     return Allele(**example)
+
 
 @pytest.fixture
 def alleleprofile_expected_outputs():
@@ -94,7 +96,25 @@ def alleleprofile_expected_outputs():
                                         "display": "0-based interval counting",
                                     }
                                 ]
-                            }
+                            },
+                            "origin": {
+                                "coding": [
+                                    {
+                                        "system": "http://hl7.org/fhir/uv/molecular-definition-data-types/CodeSystem/coordinate-origin",
+                                        "code": "sequence-start",
+                                        "display": "Sequence start",
+                                    }
+                                ]
+                            },
+                            "normalizationMethod": {
+                                "coding": [
+                                    {
+                                        "system": "http://hl7.org/fhir/uv/molecular-definition-data-types/CodeSystem/normalization-method",
+                                        "code": "fully-justified",
+                                        "display": "Fully justified",
+                                    }
+                                ]
+                            },
                         },
                         "startQuantity": {"value": Decimal(113901365)},
                         "endQuantity": {"value": Decimal(113901365)},
@@ -109,6 +129,7 @@ def alleleprofile_expected_outputs():
                         {
                             "system": "http://hl7.org/fhir/moleculardefinition-focus",
                             "code": "allele-state",
+                            "display": "Allele State",
                         }
                     ]
                 },
@@ -121,7 +142,5 @@ def alleleprofile_expected_outputs():
 def test_translate_vrs_to_alleleprofile(
     allele_translator, vrs_allele, alleleprofile_expected_outputs
 ):
-    output_dict = allele_translator.vrs_allele_to_allele_profile(
-        vrs_allele
-    ).model_dump()
+    output_dict = allele_translator.translate_allele_to_fhir(vrs_allele).model_dump()
     assert output_dict == alleleprofile_expected_outputs
