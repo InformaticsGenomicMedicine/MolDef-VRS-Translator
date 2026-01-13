@@ -1,30 +1,32 @@
-## MolDef-VRS-Translator Educational Notebook Series
+## MolDef Variation Translation — Educational Notebook Series
 
-This repository provides a collection of interactive Jupyter notebooks that offer a hands-on introduction to the **MolDef-VRS-Translator** codebase. The notebooks demonstrate how to perform bidirectional **translations between GA4GH VRS (v2.0)** and **HL7 FHIR MolecularDefinition**.
+This repository provides a collection of interactive Jupyter notebooks that offer a hands-on introduction to the **MolDef-VRS-Translator** codebase. The notebooks demonstrate bidirectional translations between **GA4GH VRS (v2.0) Alleles** and **HL7 FHIR MolecularDefinition Allele Profile**, as well as conversions from SPDI and HGVS expressions into **HL7 FHIR MolecularDefinition Variation profiles**.
 
 ### **Recommended Knowledge**
 
 To get the most out of these notebooks, we recommend the following prerequisites:
    - Familiarity with **Jupyter Notebook** and **Python**.
-   - An understanding of the **HL7 FHIR MolecularDefinition** schema, you can review it here: [FHIR MolecularDefinition Schema](https://build.fhir.org/moleculardefinition.html).
-   - Knowledge of the **GA4GH VRS (v2.0)** schema, which is essential for bidirectional translation. Documentation is available here: [GA4GH VRS Schema](https://vrs.ga4gh.org/en/stable/).
+   - An understanding of the **HL7 FHIR MolecularDefinition** schema: [FHIR MolecularDefinition Schema](https://build.fhir.org/moleculardefinition.html).
+   - Knowledge of the **GA4GH VRS (v2.0)** schema: [GA4GH VRS Schema](https://vrs.ga4gh.org/en/stable/).
 
 ## Notebook Categories
 
 ### **Translation Notebooks**
 
-- **[VRS to FHIR: Translation to AlleleProfile](vrs_allele_translation.ipynb)**  
-   - Demonstrates how to convert **GA4GH VRS (v2.0)** representations into HL7 FHIR **AlleleProfile** resources.  
+1) **[Simple Allele Creation & Translation](01_simple_allele_creation_and_translation.ipynb)**
+   - Shows how the **Allele Builder**, which simplifies the creation of **VRS Allele** object and **FHIR Allele** profile.
+   - Instead of requiring detailed knowledge of VRS or FHIR schemas, users provide just **five attributes** to generate valid Allele objects. 
+   - The resulting Allele can then be used with the project’s translation tools to convert between **VRS** and **FHIR** representations.
 
-- **[FHIR to VRS: Translation to VRS Allele](fhir_allele_translation.ipynb)**  
-   - Shows the process of translating HL7 FHIR **AlleleProfile** resources back into **GA4GH VRS (v2.0)** representations.  
+- **[VRS to FHIR: Allele Translation](02_vrs_to_fhir_allele_translation.ipynb)**  
+   - Demonstrates how **VRS Allele** representations with the **minimal required fields** are converted into **MolDef Allele Profile**.
 
-- **[Allele Factory Demo](allele_factory_demo.ipynb)**
-   - Showcases the **Allele Factory Module**, which simplifies the creation of **VRS Alleles** and **FHIR Allele** resources.
-   - Since generating these profiles requires a solid understanding of the schema, this module helps users by generating an Allele with just **five input attributes**.
-   - The **Allele Factory Module** reduces the learning curve by automating profile generation, making it easier for users to work with VRS and FHIR Alleles without deep prior knowledge of their schemas.
+- **[FHIR to VRS: Allele Translation](03_fhir_to_vrs_allele_translation.ipynb)**  
+   - Shows how **MolDef Allele Profile** with the **minimal required elements** are translated into **VRS Allele** representations.  
 
-- **[Full Allele Translations](vrs_fhir_full_translation_demo.ipynb)**  
-   - Demonstrates the **VRSToFHIR** and **FHIRToVRS** modules, which enable translation of fully populated **VRS Allele** objects into **FHIR Allele** resources, and vice versa.  
-   - Since **FHIR includes attributes beyond those defined in VRS**, the translation is asymmetric: every VRS Allele can be represented in FHIR, but only the overlapping fields can be translated from FHIR back to VRS.  
-   - This notebook goes beyond the minimal examples by focusing on **full, schema-compliant translations** within that shared subset.  
+- **[Full Allele Translations](04_full_allele_roundtrip_translation.ipynb)**  
+   - Demonstrates the **VRSToFHIR** and **FHIRToVRS** modules for translating fully populated **VRS Allele** objects to **MolDef AlleleProfile**, and vice versa.
+   - This notebook focuses on **full, schema compliant Alleles** rather than the minimal examples shown in earlier notebooks.
+
+- **[SPDI / HGVS to FHIR Variation](05_spdi_hgvs_to_fhir_variation.ipynb)**  
+  - Demonstrates how **SPDI** and **HGVS** expressions are translated into **HL7 FHIR Variation** profile resources.
