@@ -18,15 +18,15 @@ To get the most out of these notebooks, we recommend the following prerequisites
    - Instead of requiring detailed knowledge of VRS or FHIR schemas, users provide just **five attributes** to generate valid Allele objects. 
    - The resulting Allele can then be used with the project’s translation tools to convert between **VRS** and **FHIR** representations.
 
-- **[VRS to FHIR: Allele Translation](02_vrs_to_fhir_allele_translation.ipynb)**  
+2) **[VRS to FHIR: Allele Translation](02_vrs_to_fhir_allele_translation.ipynb)**  
    - Demonstrates how **VRS Allele** representations with the **minimal required fields** are converted into **MolDef Allele Profile**.
 
-- **[FHIR to VRS: Allele Translation](03_fhir_to_vrs_allele_translation.ipynb)**  
+3) **[FHIR to VRS: Allele Translation](03_fhir_to_vrs_allele_translation.ipynb)**  
    - Shows how **MolDef Allele Profile** with the **minimal required elements** are translated into **VRS Allele** representations.  
 
-- **[Full Allele Translations](04_full_allele_roundtrip_translation.ipynb)**  
+4) **[Full Allele Translations](04_full_allele_roundtrip_translation.ipynb)**  
    - Demonstrates the **VRSToFHIR** and **FHIRToVRS** modules for translating fully populated **VRS Allele** objects to **MolDef AlleleProfile**, and vice versa.
    - This notebook focuses on **full, schema compliant Alleles** rather than the minimal examples shown in earlier notebooks.
 
-- **[SPDI / HGVS to FHIR Variation](05_spdi_hgvs_to_fhir_variation.ipynb)**  
+5) **[SPDI / HGVS to FHIR Variation](05_spdi_hgvs_to_fhir_variation.ipynb)**  
   - Demonstrates how **SPDI** and **HGVS** expressions are translated into **HL7 FHIR Variation** profile resources.
