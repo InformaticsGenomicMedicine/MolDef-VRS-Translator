@@ -8,7 +8,62 @@
 This repository isolates the translation layer from our broader genomics tooling suite, providing a focused, standalone implementation for mapping between these two standards.
 
 ---
-### Getting Started
+---
+## Local Setup
+
+Follow these steps to set up the project for local development.
+
+### 1. Clone the Repository
+Make sure you’re logged into GitHub, then clone the repository and navigate into it:
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/MolDef-VRS-Translator.git
+cd MolDef-VRS-Translator
+```
+
+### 2. Create and Activate a Virtual Environment
+We recommend using Python’s built-in `venv` module.
+
+   ```bash
+   python -m venv venv
+   ```
+
+Activate the virtual environment
+
+- **macOS/Linux**
+   ```bash
+   source venv/bin/activate
+   ```
+- **Windows** 
+   ```bash
+   venv\Scripts\activate
+   ```
+
+### 3. Install the Package
+- **Installation (until the package is published)**
+   ```bash
+   pip install . 
+   ```
+
+- **Local Development**
+   ```bash
+   pip install -e .[dev]
+   ```
+
+### 4. Verify Installation
+Confirm the package was installed successfully
+   ```bash
+   pip show fhir.moldef.translator
+   ```
+
+## Jupyter Notebooks
+
+This repository includes example Jupyter notebooks for exploring and experimenting with the project.
+
+* **[`notebooks/README.md`](notebooks/README.md)**
+
+<!-- ### Getting Started
 This project is not yet published on PyPI and is still under active development.
 
 If you would like to perform translations or explore the interactive translation notebooks, please see the
@@ -21,7 +76,7 @@ That main repository includes:
 * Interactive notebooks
 * Codespaces environment that lets you run the code without installing locally 
 
-Refer to its README for step-by-step instructions and setup details. 
+Refer to its README for step-by-step instructions and setup details.  -->
 
 ---
 ### Roadmap & Integration Plans
