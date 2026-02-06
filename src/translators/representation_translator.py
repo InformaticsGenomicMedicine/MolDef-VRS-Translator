@@ -1,9 +1,9 @@
 from ga4gh.vrs.dataproxy import create_dataproxy
-
 from resources.moleculardefinition import (
     MolecularDefinitionRepresentation,
     MolecularDefinitionRepresentationLiteral,
 )
+
 from translators.validations.indexing import apply_indexing
 
 

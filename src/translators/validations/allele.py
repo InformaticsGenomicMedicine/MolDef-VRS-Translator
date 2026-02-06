@@ -1,8 +1,9 @@
+from profiles.allele import Allele as FhirAllele
+
 from exceptions.utils import (
     InvalidAlleleProfileError,
     InvalidVRSAlleleError,
 )
-from profiles.allele import Allele as FhirAllele
 
 
 def validate_vrs_allele(expression):

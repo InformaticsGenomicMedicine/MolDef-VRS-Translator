@@ -3,7 +3,6 @@ from fhir.resources.coding import Coding
 from fhir.resources.quantity import Quantity
 from fhir.resources.reference import Reference
 from ga4gh.vrs.dataproxy import create_dataproxy
-
 from profiles.variation import Variation
 from resources.moleculardefinition import (
     MolecularDefinitionLocation,
@@ -13,6 +12,7 @@ from resources.moleculardefinition import (
     MolecularDefinitionRepresentation,
     MolecularDefinitionRepresentationLiteral,
 )
+
 from conventions.coordinate_systems import (
     hgvs_coordinate_interval,
     spdi_coordinate_interval,
