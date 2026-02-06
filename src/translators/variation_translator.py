@@ -17,22 +17,21 @@ from conventions.coordinate_systems import (
     hgvs_coordinate_interval,
     spdi_coordinate_interval,
 )
-from conventions.refseq_identifiers import detect_sequence_type,refseq_to_fhir_id
+from conventions.refseq_identifiers import detect_sequence_type, refseq_to_fhir_id
 from vrs_tools.hgvs_tools import HgvsToolsLite
 
 
 class VariationTranslation:
-
     def __init__(self, dp=None, uri: str | None = None):
         self.dp = dp or create_dataproxy(uri=uri)
-        #most likely need to replace this
+        # most likely need to replace this
         self.hgvs_tools = HgvsToolsLite(data_proxy=self.dp)
 
     def _hgvs_position(self, sv):
         pos = sv.posedit.pos
         return pos.start.base, pos.end.base
 
-    def _from_spdi(self,spdi):
+    def _from_spdi(self, spdi):
         """Parse an SPDI string and convert it into a FHIR Variation Profile object.
 
         Args:
@@ -40,19 +39,21 @@ class VariationTranslation:
 
         Raises:
             TypeError: If the provided `spdi` argument is not a string.
-            ValueError:  If the SPDI string does not contain four colon-separated fields or 
+            ValueError:  If the SPDI string does not contain four colon-separated fields or
             cannot be parsed correctly.
 
         Returns:
             object: A FHIR Variation Profile object representing the parsed SPDI variant.
         """
-        if not isinstance(spdi,str):
+        if not isinstance(spdi, str):
             raise TypeError("SPDI expression must be a string.")
 
         try:
-            seq_acc,pos,del_seq_or_len,ins_seq = spdi.split(":",maxsplit=3)
+            seq_acc, pos, del_seq_or_len, ins_seq = spdi.split(":", maxsplit=3)
         except:
-            raise ValueError(f"Invalid SPDI expected four colon-separated fields: {spdi}")
+            raise ValueError(
+                f"Invalid SPDI expected four colon-separated fields: {spdi}"
+            )
 
         seq_acc = str(seq_acc).strip()
 
@@ -68,20 +69,19 @@ class VariationTranslation:
 
         aliases = self.dp.translate_sequence_identifier(seq_acc, "refseq")
         aliases = [a.split(":")[1] for a in aliases]
-        ref_seq = self.dp.get_sequence(aliases[0],start,end)
+        ref_seq = self.dp.get_sequence(aliases[0], start, end)
 
         values = {
             "refget_accession": seq_acc,
             "start": start,
             "end": end,
             "ref_seq": ref_seq,
-            "alt_seq": alt_seq
+            "alt_seq": alt_seq,
         }
 
-        return self._create_variation_profile(values,fmt="spdi")
+        return self._create_variation_profile(values, fmt="spdi")
 
-    def _from_hgvs(self,hgvs_expr):
-
+    def _from_hgvs(self, hgvs_expr):
         sv = self.hgvs_tools.parse(hgvs_expr)
         if not sv:
             return None
@@ -93,20 +93,20 @@ class VariationTranslation:
 
         edit_type = self.hgvs_tools.get_edit_type(sv)
 
-        if edit_type in {"del","delins","dup"}:
-            ref_seq = self.dp.get_sequence(sv.ac,start_pos,end_pos)
+        if edit_type in {"del", "delins", "dup"}:
+            ref_seq = self.dp.get_sequence(sv.ac, start_pos, end_pos)
         elif edit_type == "ins":
             ref_seq = sv.posedit.edit.ref or ""
         elif edit_type == "sub":
             ref_seq = sv.posedit.edit.ref
         elif edit_type == "identity":
-            ref_seq = self.dp.get_sequence(sv.ac,start_pos,end_pos)
+            ref_seq = self.dp.get_sequence(sv.ac, start_pos, end_pos)
             if not ref_seq:
                 ref_seq = sv.posedit.edit.alt or ""
         else:
             raise NotImplementedError(f"Unsupported HGVS edit type: {edit_type}")
 
-        start,end = self._hgvs_position(sv)
+        start, end = self._hgvs_position(sv)
 
         values = {
             "refget_accession": sv.ac,
@@ -114,11 +114,11 @@ class VariationTranslation:
             "end": end,
             "ref_seq": ref_seq,
             "alt_seq": alt_seq,
-            }
+        }
 
         return self._create_variation_profile(values, fmt="hgvs")
 
-    def _create_variation_profile(self,values,fmt):
+    def _create_variation_profile(self, values, fmt):
         """Create a FHIR Variation resource from parsed variant data (HGVS or SPDI).
 
         Args:
@@ -133,42 +133,52 @@ class VariationTranslation:
         sequence_type = detect_sequence_type(values["refget_accession"])
 
         mol_type = CodeableConcept(
-            coding=[Coding(
-                system =  MOLTYPE_SYSTEM_DEFAULT_VALUE,
-                code =  sequence_type.lower(),
-                display =  f"{sequence_type} Sequence",
-                )])
+            coding=[
+                Coding(
+                    system=MOLTYPE_SYSTEM_DEFAULT_VALUE,
+                    code=sequence_type.lower(),
+                    display=f"{sequence_type} Sequence",
+                )
+            ]
+        )
 
         if fmt == "hgvs":
-            coord_system_values, coord_system_origin, normalization_method = hgvs_coordinate_interval(molType=sequence_type)
+            coord_system_values, coord_system_origin, normalization_method = (
+                hgvs_coordinate_interval(molType=sequence_type)
+            )
         elif fmt == "spdi":
-            coord_system_values, coord_system_origin, normalization_method = spdi_coordinate_interval()
+            coord_system_values, coord_system_origin, normalization_method = (
+                spdi_coordinate_interval()
+            )
 
         fhir_id = refseq_to_fhir_id(refseq_accession=values["refget_accession"])
 
         sequence_context = Reference(
             reference=f"#ref-to-{fhir_id}",
-            type = "MolecularDefinition",
-            display= values['refget_accession']
+            type="MolecularDefinition",
+            display=values["refget_accession"],
         )
 
         coord_system = MolecularDefinitionLocationSequenceLocationCoordinateIntervalCoordinateSystem(
-                system=coord_system_values,
-                origin=coord_system_origin,
-                normalizationMethod= normalization_method
-            )
+            system=coord_system_values,
+            origin=coord_system_origin,
+            normalizationMethod=normalization_method,
+        )
 
-        start, end = Quantity(value=int(values["start"])),Quantity(value=int(values["end"]))
+        start, end = (
+            Quantity(value=int(values["start"])),
+            Quantity(value=int(values["end"])),
+        )
 
         coord_interval = MolecularDefinitionLocationSequenceLocationCoordinateInterval(
-                coordinateSystem=coord_system,
-                startQuantity=start,
-                endQuantity=end,
-            )
+            coordinateSystem=coord_system,
+            startQuantity=start,
+            endQuantity=end,
+        )
 
         seq_loc = MolecularDefinitionLocationSequenceLocation(
-                sequenceContext=sequence_context, coordinateInterval=coord_interval
-            )
+            sequenceContext=sequence_context, coordinateInterval=coord_interval
+        )
         location = MolecularDefinitionLocation(sequenceLocation=seq_loc)
 
         ############################ Rep trans ########################
@@ -176,14 +186,16 @@ class VariationTranslation:
             value=values["ref_seq"]
         )
         ref_state_rep = MolecularDefinitionRepresentation(
-            focus= CodeableConcept(
-                coding=[Coding(
-                    system=FOCUS_SYSTEM_DEFAULT_VALUE,
-                    code="reference-state",
-                    display="Reference State"
-                )]
+            focus=CodeableConcept(
+                coding=[
+                    Coding(
+                        system=FOCUS_SYSTEM_DEFAULT_VALUE,
+                        code="reference-state",
+                        display="Reference State",
+                    )
+                ]
             ),
-            literal=ref_state_lit_value
+            literal=ref_state_lit_value,
         )
 
         alt_state_lit_value = MolecularDefinitionRepresentationLiteral(
@@ -191,23 +203,25 @@ class VariationTranslation:
         )
 
         alt_state_rep = MolecularDefinitionRepresentation(
-            focus= CodeableConcept(
-                coding=[Coding(
-                    system=FOCUS_SYSTEM_DEFAULT_VALUE,
-                    code="alternative-state",
-                    display="Alternative State"
-                )]
+            focus=CodeableConcept(
+                coding=[
+                    Coding(
+                        system=FOCUS_SYSTEM_DEFAULT_VALUE,
+                        code="alternative-state",
+                        display="Alternative State",
+                    )
+                ]
             ),
-            literal=alt_state_lit_value
+            literal=alt_state_lit_value,
         )
         ############################ Rep trans ########################
 
         return Variation(
             # id="PLACEHOLDER VALUE FOR NOW",
-            #contained = this is where you might want to place the refseq accission but do this later.
-            moleculeType = mol_type,
+            # contained = this is where you might want to place the refseq accission but do this later.
+            moleculeType=mol_type,
             location=[location],
-            representation=[ref_state_rep,alt_state_rep]
+            representation=[ref_state_rep, alt_state_rep],
         )
 
     def translate_from(self, var, fmt):
