@@ -79,23 +79,39 @@ That main repository includes:
 Refer to its README for step-by-step instructions and setup details.  -->
 
 ---
-### Roadmap & Integration Plans
-**Now**
-* Packaging **[MolDef-spec-python](https://github.com/InformaticsGenomicMedicine/MolDef-spec-python)**
-    * Contains the MolecularDefinition schema and the Allele/Sequence profiles
-    * Will be integrated as a dependency once finalized
+## Roadmap & Integration Plans
 
-**Next**
-* Package **MolDef-vrs-translator** as a standalone, installable Python package
+### Current Focus
+- Package [MolDef-spec-python](https://github.com/InformaticsGenomicMedicine/MolDef-spec-python)  
+  - Provides the MolecularDefinition schema and Allele/Sequence profiles  
+  - Will be integrated as a dependency once finalized  
 
+### Next Steps
+- Package MolDef-vrs-translator as a standalone, installable Python package  
+
+
+## Contributing
+
+Contributions are welcome and greatly appreciated.
+
+- Fork the repository and submit a pull request
+- Report bugs or request features by opening an issue
+
+Thank you for helping improve this project.
 
 ## Acknowledgments
-This project builds on the following packages and resources.
 
-- **[vrs-python](https://github.com/ga4gh/vrs-python)**
-- **[biocommons.seqrepo](https://github.com/biocommons/biocommons.seqrepo)**
-- **[biocommons.seqrepo-rest-services](https://github.com/biocommons/seqrepo-rest-service)**
-- **[HL7 FHIR](https://hl7.org/fhir/6.0.0-ballot2/moleculardefinition.html)**
-- **[fhir.resource](https://github.com/nazrulworld/fhir.resources)**
-- **[fhir-core](https://github.com/nazrulworld/fhir-core)**
-- **[MolDef-spec-python](https://github.com/InformaticsGenomicMedicine/MolDef-spec-python)**
+This project builds upon the following community standards and open-source implementations:
+
+### Standards
+
+- [GA4GH Variation Representation Specification (VRS)](https://vrs.ga4gh.org/)
+- [HL7 FHIR MolecularDefinition](https://hl7.org/fhir/6.0.0-ballot2/moleculardefinition.html)
+
+### Software
+
+- [vrs-python](https://github.com/ga4gh/vrs-python)
+- [biocommons.seqrepo](https://github.com/biocommons/biocommons.seqrepo)
+- [MolDef-spec-python](https://github.com/InformaticsGenomicMedicine/MolDef-spec-python)
+
+We gratefully acknowledge the communities and contributors who develop and maintain these resources.
