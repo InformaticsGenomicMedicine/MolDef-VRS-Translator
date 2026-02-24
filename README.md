@@ -8,7 +8,6 @@
 This repository isolates the translation layer from our broader genomics tooling suite, providing a focused, standalone implementation for mapping between these two standards.
 
 ---
----
 ## Local Setup
 
 Follow these steps to set up the project for local development.
