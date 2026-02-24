@@ -1,34 +1,47 @@
 [project]
-name = "fhir.moldef.translator" 
-version = "0.3.0" 
-description = "This project provides bidirectional translation between VRS and FHIR Allele Profiles."
+name = "moldef.translator" 
+version = "0.4.0" 
+description = "A Python implementation supporting translation between HL7 FHIR MolecularDefinition profiles and genomic representations including VRS, HGVS, and SPDI."
 readme = "README.md"
 authors = [
     {name = "Salem Bajjali"},
     {name = "Robert R. Freimuth"},
 ]
 
-license = {file = "LICENSE"}
-# Keywords for your project. These are tags that help users find the project.
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+
 keywords = [
     "FHIR",
+    "HL7",
     "MolecularDefinition",
-    "FHIR-python"
-]  
+    "genomics",
+    "variation",
+    "representation",
+    "bioinformatics",
+    "GA4GH",
+    "VRS",
+    "HGVS",
+    "SPDI"
+] 
+
 classifiers = [
-    "Intended Audience :: Science/Research",
     "Intended Audience :: Developers",
+    "Intended Audience :: Healthcare Industry",
+    "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.11"
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
-requires-python = ">=3.11"
 
 dependencies = [
     "ga4gh.vrs[extras]==2.3.1",
     "ipykernel==6.28.0",
-    ]
+    "moldef-spec",
+]
 
 [project.optional-dependencies]
 dev = [
@@ -67,3 +80,6 @@ fixable = ["ALL"]
 [tool.ruff.format]
 quote-style = "double"  # Enforce double quotes
 docstring-code-format = true  # Format code inside docstrings
+
+[tool.uv.sources]
+moldef-spec = { path = "../MolDef-spec-python", editable = true }
