@@ -3,7 +3,7 @@ from decimal import Decimal
 import pytest
 from ga4gh.vrs.models import Allele
 
-from translators.vrs_fhir_translator import VrsFhirAlleleTranslator
+from translators.minimal_allele_translator import MinimalVrsAlleleToFhirAlleleTranslator
 
 
 @pytest.fixture
@@ -29,7 +29,7 @@ def example():
 
 @pytest.fixture
 def allele_translator():
-    return VrsFhirAlleleTranslator()
+    return MinimalVrsAlleleToFhirAlleleTranslator()
 
 
 @pytest.fixture
@@ -142,5 +142,5 @@ def alleleprofile_expected_outputs():
 def test_translate_vrs_to_alleleprofile(
     allele_translator, vrs_allele, alleleprofile_expected_outputs
 ):
-    output_dict = allele_translator.translate_allele_to_fhir(vrs_allele).model_dump()
+    output_dict = allele_translator.translate(vrs_allele).model_dump()
     assert output_dict == alleleprofile_expected_outputs
