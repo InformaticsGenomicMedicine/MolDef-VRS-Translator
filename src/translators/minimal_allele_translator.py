@@ -13,14 +13,6 @@ from ga4gh.vrs.models import (
     SequenceReference,
     sequenceString,
 )
-
-from conventions.coordinate_systems import vrs_coordinate_interval
-from conventions.refseq_identifiers import (
-    detect_sequence_type,
-    refseq_to_fhir_id,
-    translate_sequence_id,
-    validate_accession,
-)
 from profiles.allele import Allele as FhirAllele
 from profiles.sequence import Sequence as FhirSequence
 from resources.moleculardefinition import (
@@ -31,20 +23,26 @@ from resources.moleculardefinition import (
     MolecularDefinitionRepresentation,
     MolecularDefinitionRepresentationLiteral,
 )
+
+from conventions.coordinate_systems import vrs_coordinate_interval
+from conventions.refseq_identifiers import (
+    detect_sequence_type,
+    refseq_to_fhir_id,
+    translate_sequence_id,
+    validate_accession,
+)
 from translators.validations.allele import validate_allele_profile, validate_vrs_allele
 from translators.validations.indexing import apply_indexing
 from vrs_tools.normalizer import VariantNormalizer
 
+"""Provide minimal bidirectional translation between VRS Allele and FHIR Allele Profiles."""
 
-class VrsFhirAlleleTranslator:
-    """Provide minimal bidirectional translation between VRS Allele and FHIR Allele Profiles."""
-
+class MinimalFhirAlleleToVrsAlleleTranslator:
+    """Provide minimal translation from a FHIR Allele Profile to a VRS Allele object."""
     def __init__(self, dp=None, uri: str | None = None):
         self.dp = dp or create_dataproxy(uri=uri)
         self.service = VariantNormalizer(dp=self.dp)
         self.allele_denormalizer = VariantNormalizer(dp=self.dp)
-
-    ##############################################################
 
     def _is_valid_sequence_location(self, locations):
         """Validates the `sequenceLocation` structure within the provided locations to ensure all necessary attributes are present for accurate translations.
@@ -168,25 +166,6 @@ class VrsFhirAlleleTranslator:
                         "Missing `literal.value` for the `allele-state` representation."
                     )
 
-    def _extract_vrs_values(self, expression, dp):
-        """Extract GA4GH ID, RefSeq ID, start, end, and sequence from a VRS Allele.
-
-        Args:
-            expression: A VRS Allele object.
-            dp: SeqRepo data proxy for ID translation.
-
-        Returns:
-            tuple: (refseq_id, start_pos, end_pos, alt_allele)
-        """
-        validate_vrs_allele(expression)
-
-        refgetAccession = translate_sequence_id(dp, expression)
-        start_pos = expression.location.start
-        end_pos = expression.location.end
-        alt_allele = expression.state.sequence.model_dump()
-
-        return refgetAccession, start_pos, end_pos, alt_allele
-
     def _validate_and_extract_code(self, expression):
         if not expression.contained:
             raise ValueError("Missing 'contained' field.")
@@ -207,9 +186,7 @@ class VrsFhirAlleleTranslator:
 
         return validate_accession(code_item.coding[0].code)
 
-    #############################################################
-
-    def translate_allele_to_vrs(self, expression, normalize=True):
+    def translate(self, expression, normalize=True):
         """Converts an FHIR Allele Profile object into a GA4GH VRS Allele object.
 
         Args:
@@ -266,7 +243,34 @@ class VrsFhirAlleleTranslator:
 
         return self.service.normalize(allele) if normalize else allele
 
-    def translate_allele_to_fhir(self, expression):
+
+class MinimalVrsAlleleToFhirAlleleTranslator:
+    """Provide minimal translation from a FHIR Allele Profile to a VRS Allele object."""
+    def __init__(self, dp=None, uri: str | None = None):
+        self.dp = dp or create_dataproxy(uri=uri)
+        self.service = VariantNormalizer(dp=self.dp)
+        self.allele_denormalizer = VariantNormalizer(dp=self.dp)
+
+    def _extract_vrs_values(self, expression, dp):
+        """Extract GA4GH ID, RefSeq ID, start, end, and sequence from a VRS Allele.
+
+        Args:
+            expression: A VRS Allele object.
+            dp: SeqRepo data proxy for ID translation.
+
+        Returns:
+            tuple: (refseq_id, start_pos, end_pos, alt_allele)
+        """
+        validate_vrs_allele(expression)
+
+        refgetAccession = translate_sequence_id(dp, expression)
+        start_pos = expression.location.start
+        end_pos = expression.location.end
+        alt_allele = expression.state.sequence.model_dump()
+
+        return refgetAccession, start_pos, end_pos, alt_allele
+
+    def translate(self, expression):
         """Converts an GA4GH VRS Allele object into FHIR Allele object.
 
         Args:
@@ -364,3 +368,5 @@ class VrsFhirAlleleTranslator:
             location=[location],
             representation=[moldef_repr],
         )
+
+
