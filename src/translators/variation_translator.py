@@ -3,6 +3,12 @@ from fhir.resources.coding import Coding
 from fhir.resources.quantity import Quantity
 from fhir.resources.reference import Reference
 from ga4gh.vrs.dataproxy import create_dataproxy
+
+from conventions.coordinate_systems import (
+    hgvs_coordinate_interval,
+    spdi_coordinate_interval,
+)
+from conventions.refseq_identifiers import detect_sequence_type, refseq_to_fhir_id
 from profiles.variation import Variation
 from resources.moleculardefinition import (
     MolecularDefinitionLocation,
@@ -12,22 +18,18 @@ from resources.moleculardefinition import (
     MolecularDefinitionRepresentation,
     MolecularDefinitionRepresentationLiteral,
 )
-
-from conventions.coordinate_systems import (
-    hgvs_coordinate_interval,
-    spdi_coordinate_interval,
-)
-from conventions.refseq_identifiers import detect_sequence_type, refseq_to_fhir_id
 from vrs_tools.hgvs_tools import HgvsToolsLite
 
 
 class VariationTranslation:
+    """Translating a SPDI or HGVS expression into a FHIR Variation Profile object."""
     def __init__(self, dp=None, uri: str | None = None):
         self.dp = dp or create_dataproxy(uri=uri)
         # most likely need to replace this
         self.hgvs_tools = HgvsToolsLite(data_proxy=self.dp)
 
     def _hgvs_position(self, sv):
+        """Extract the start and end base positions from an HGVS sequence variant."""
         pos = sv.posedit.pos
         return pos.start.base, pos.end.base
 
@@ -82,9 +84,21 @@ class VariationTranslation:
         return self._create_variation_profile(values, fmt="spdi")
 
     def _from_hgvs(self, hgvs_expr):
+        """Create a variation profile from an HGVS expression.
+
+        Args:
+            hgvs_expr (str): An HGVS expression.
+
+        Raises:
+            ValueError: If the HGVS expression cannot be parsed or represents an intronic variant.
+            NotImplementedError: If the HGVS edit type is not supported.
+
+        Returns:
+            VariationProfile: A variation profile derived from the HGVS expression.
+        """
         sv = self.hgvs_tools.parse(hgvs_expr)
         if not sv:
-            return None
+            raise ValueError(f"Failed to parse HGVS expression: {hgvs_expr}")
 
         if self.hgvs_tools.is_intronic(sv):
             raise ValueError("Intronic HGVS variants are not supported")

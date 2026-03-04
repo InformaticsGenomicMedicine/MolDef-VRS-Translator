@@ -22,6 +22,7 @@ from translators.constants.vrs_json_pointers import (
 
 
 class FhirToVrsAlleleTranslator:
+    """Translate a FHIR Allele Profile into a GA4GH VRS Allele, providing full translation."""
     def translate_allele_to_vrs(self, ao):
         """Converts a FHIR Allele Profile object into a fully populated VRS 2.0 Allele object.
 
@@ -385,7 +386,7 @@ class FhirToVrsAlleleTranslator:
                 "extensions": [],
             }
 
-            for ext in getattr(loc, "extension", []):
+            for ext in getattr(loc, "extension", None) or []:
                 url = getattr(ext, "url", "") or ""
                 val = self._get_extension_value(ext)
 

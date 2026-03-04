@@ -1,21 +1,30 @@
 from ga4gh.vrs.dataproxy import create_dataproxy
+
 from resources.moleculardefinition import (
     MolecularDefinitionRepresentation,
     MolecularDefinitionRepresentationLiteral,
 )
-
 from translators.validations.indexing import apply_indexing
 
 
 class RepresentationTranslator:
-    """A class to handle the translation between HL7 FHIR Molecular Definition Representations, including extracted, repeated, and relative representations, into literal representations.
-    Currently, RepresentationTranslator can only handle extracted and repeated representations.
-    """
+    """A class to handle the translation between HL7 FHIR Molecular Definition Representations, including extracted, repeated, and relative representations, into literal representations. Currently, RepresentationTranslator can only handle extracted and repeated representations."""
 
     def __init__(self, dp=None, uri: str | None = None):
         self.dp = dp or create_dataproxy(uri=uri)
 
     def _validate_representation(self, expression):
+        """Validate that the MolecularDefinition contains a representation attribute.
+
+        Args:
+            expression (MolecularDefinition): A MolecularDefinition object to validate.
+
+        Raises:
+            ValueError: If the expression does not contain a representation attribute.
+
+        Returns:
+            list: The representation associated with the MolecularDefinition.
+        """
         if not hasattr(expression, "representation"):
             raise ValueError(
                 "MolecularDefinition Object does not contain representation attribute"
