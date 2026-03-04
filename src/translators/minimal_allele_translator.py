@@ -35,8 +35,6 @@ from translators.validations.allele import validate_allele_profile, validate_vrs
 from translators.validations.indexing import apply_indexing
 from vrs_tools.normalizer import VariantNormalizer
 
-"""Provide minimal bidirectional translation between VRS Allele and FHIR Allele Profiles."""
-
 class MinimalFhirAlleleToVrsAlleleTranslator:
     """Provide minimal translation from a FHIR Allele Profile to a VRS Allele object."""
     def __init__(self, dp=None, uri: str | None = None):
