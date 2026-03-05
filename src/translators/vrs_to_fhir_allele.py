@@ -44,7 +44,7 @@ class VrsToFhirAlleleTranslator:
         self.dp = dp or create_dataproxy(uri=uri)
         self.allele_denormalizer = VariantNormalizer(dp=self.dp)
 
-    def translate_allele_to_fhir(self, vrs_allele):
+    def translate(self, vrs_allele):
         """Convert a GA4GH VRS Allele object into its corresponding FHIR Allele Profile representation, currently supporting only alleles with a state type of LiteralSequenceExpression or ReferenceLengthExpression."""
         validate_vrs_allele(vrs_allele)
 
