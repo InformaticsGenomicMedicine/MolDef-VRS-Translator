@@ -21,7 +21,7 @@ from resources.moleculardefinition import (
 from vrs_tools.hgvs_tools import HgvsToolsLite
 
 
-class VariationTranslation:
+class VariationToFhirTranslator:
     """Translating a SPDI or HGVS expression into a FHIR Variation Profile object."""
     def __init__(self, dp=None, uri: str | None = None):
         self.dp = dp or create_dataproxy(uri=uri)
@@ -238,7 +238,7 @@ class VariationTranslation:
             representation=[ref_state_rep, alt_state_rep],
         )
 
-    def translate_from(self, var, fmt):
+    def translate(self, var, fmt):
         """Translate a variant (HGVS or SPDI) into a FHIR Variation object.
 
         Args:
