@@ -1,6 +1,6 @@
 import pytest
 
-from translators.variation_translator import VariationTranslation
+from translators.variation_to_fhir import VariationToFhirTranslator
 
 # Example from vrs-python translation test module
 
@@ -698,49 +698,49 @@ dup_expected_spdi = {
 
 @pytest.fixture
 def variation_translator():
-    return VariationTranslation()
+    return VariationToFhirTranslator()
 
 
 def test_from_hgvs(variation_translator):
     assert (
-        variation_translator.translate_from(sub_input["hgvs"], fmt="hgvs").model_dump()
+        variation_translator.translate(sub_input["hgvs"], fmt="hgvs").model_dump()
         == sub_expected_hgvs
     )
     assert (
-        variation_translator.translate_from(del_input["hgvs"], fmt="hgvs").model_dump()
+        variation_translator.translate(del_input["hgvs"], fmt="hgvs").model_dump()
         == del_expected_hgvs
     )
     assert (
-        variation_translator.translate_from(ins_input["hgvs"], fmt="hgvs").model_dump()
+        variation_translator.translate(ins_input["hgvs"], fmt="hgvs").model_dump()
         == ins_expected_hgvs
     )
     assert (
-        variation_translator.translate_from(dup_input["hgvs"], fmt="hgvs").model_dump()
+        variation_translator.translate(dup_input["hgvs"], fmt="hgvs").model_dump()
         == dup_expected_hgvs
     )
 
 
 def test_from_spdi(variation_translator):
     assert (
-        variation_translator.translate_from(sub_input["spdi"], fmt="spdi").model_dump()
+        variation_translator.translate(sub_input["spdi"], fmt="spdi").model_dump()
         == sub_expected_spdi
     )
 
     del_results = [
-        variation_translator.translate_from(spdi_input, fmt="spdi").model_dump()
+        variation_translator.translate(spdi_input, fmt="spdi").model_dump()
         for spdi_input in del_input["spdi"]
     ]
     assert del_results[0] == del_results[1]
     assert del_results[0] == del_expected_spdi
 
     ins_results = [
-        variation_translator.translate_from(spdi_input, fmt="spdi").model_dump()
+        variation_translator.translate(spdi_input, fmt="spdi").model_dump()
         for spdi_input in ins_input["spdi"]
     ]
     assert ins_results[0] == ins_results[1]
     assert ins_results[0] == ins_expected_spdi
 
     assert (
-        variation_translator.translate_from(dup_input["spdi"], fmt="spdi").model_dump()
+        variation_translator.translate(dup_input["spdi"], fmt="spdi").model_dump()
         == dup_expected_spdi
     )
