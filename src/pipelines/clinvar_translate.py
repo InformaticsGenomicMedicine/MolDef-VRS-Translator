@@ -9,7 +9,7 @@ from pathlib import Path
 import orjson
 from ga4gh.vrs.models import Allele
 
-from translators.vrs_to_fhir import VrsToFhirAlleleTranslator
+from translators.vrs_to_fhir_allele import VrsToFhirAlleleTranslator
 
 
 @dataclass
@@ -31,7 +31,7 @@ class ClinvarTranslationSummary:
 
 class ClinvarTranslationPipeline:
     def __init__(self):
-        self.vrs_translator = VrsToFhirAlleleTranslator()
+        self.vrs_to_fhir_translator = VrsToFhirAlleleTranslator()
 
     def run(
         self, inputfile, outputfile, invalid_allele_path, invalid_fhir_path, limit=None
@@ -101,7 +101,7 @@ class ClinvarTranslationPipeline:
                                 allele_type["other_count"] += 1
 
                             try:
-                                fhir_obj = self.vrs_translator.translate_allele_to_fhir(
+                                fhir_obj = self.vrs_to_fhir_translator.translate(
                                     vo
                                 )
 
