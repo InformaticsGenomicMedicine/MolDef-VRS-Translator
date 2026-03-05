@@ -332,7 +332,7 @@ fhir_synthetic_data = {
                 "sequenceContext": {
                     "reference": "#vrs-location-sequence",
                     "type": "Sequence",
-                    "display": "VRS location.sequence as contained FHIR Sequence",
+                    "display": "VRS location.sequence as contained FHIR Sequence.",
                 },
                 "coordinateInterval": {
                     "coordinateSystem": {
