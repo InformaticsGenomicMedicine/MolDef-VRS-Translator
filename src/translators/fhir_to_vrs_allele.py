@@ -166,13 +166,13 @@ class FhirToVrsAlleleTranslator:
         Returns:
             SequenceReference: A fully populated VRS 2.0 `SequenceReference` object including identifiers, sequence string, and relevant extensions.
         """
-        _, sequenceReference = self._extract_contained_sequences(ao)
-        ref_seq_data = self._extract_reference_sequence_fields(sequenceReference)
+        _, sequence_reference = self._extract_contained_sequences(ao)
+        ref_seq_data = self._extract_reference_sequence_fields(sequence_reference)
 
         mapped_extensions = self._map_extension(ref_seq_data["extensions"])
 
         refget_accession, molecule_type, residue_alphabet, literal_sequence = (
-            self._extract_contained_sequence_reference_details(sequenceReference)
+            self._extract_contained_sequence_reference_details(sequence_reference)
         )
 
         return SequenceReference(
@@ -249,7 +249,7 @@ class FhirToVrsAlleleTranslator:
         """
         # These are always present
         representation = seq_ref.representation[0]
-        refgetAccession = representation.code[0].coding[0].code
+        refget_accession = representation.code[0].coding[0].code
         molecule_type = seq_ref.moleculeType.coding[0].code
 
         residue_alphabet = None
@@ -264,7 +264,7 @@ class FhirToVrsAlleleTranslator:
         if residue_alphabet is None:
             residue_alphabet = self._infer_residue_alphabet(molecule_type)
 
-        return refgetAccession, molecule_type, residue_alphabet, sequence
+        return refget_accession, molecule_type, residue_alphabet, sequence
 
     def _infer_residue_alphabet(self, molecule_type):
         """Infers the residue alphabet category based on the moleculeType attribute.
@@ -292,12 +292,12 @@ class FhirToVrsAlleleTranslator:
         Returns:
             str: A molecule type string compatible with VRS. One of 'genomic', 'RNA', or 'protein'.
         """
-        mapped_molType = {"dna": "genomic", "rna": "RNA", "amino acid": "protein"}
+        mapped_mol_type = {"dna": "genomic", "rna": "RNA", "amino acid": "protein"}
 
         molecule_type = molecule_type.lower()
 
-        if molecule_type in mapped_molType:
-            return mapped_molType[molecule_type]
+        if molecule_type in mapped_mol_type:
+            return mapped_mol_type[molecule_type]
 
         raise ValueError(
             f"Unsupported moleculeType: '{molecule_type}'. Expected one of: dna, rna, amino acid."
